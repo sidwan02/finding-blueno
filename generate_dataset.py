@@ -26,45 +26,53 @@ class ProcessDataset():
             # inputPath contains the full directory name
             img = Image.open(inputPath)
 
-            full_image_path = os.path.join(target_image, path)
+            processed_image_path = os.path.join(
+                target_image, 'processed_' + path)
+            mask_path = os.path.join(target_mask, 'mask_' + path)
             # fullOutPath contains the path of the output
 
             # image that needs to be generated
-            img.rotate(90).save(full_image_path)
+            # img.rotate(90).save(full_image_path)
+            processed_img = self.superimpose_bleuno(img)
+
+            mask = self.generate_mask(255)
+
+            processed_img.save(processed_image_path)
+            mask.save(mask_path)
+
             # img
 
             # print(full_image_path)
             counter += 1
 
-    def superimpose_bleuno():
-        background = Image.open("test1.png")
-
-        foreground = Image.open("test2.png")
-
-        background.paste(foreground, (0, 0), foreground)
-        background.show()
-
-    def superimpose_bleuno():
-        background = Image.open("test1.png")
-
-        foreground = Image.open("test2.png")
+    def superimpose_bleuno(self, background):
+        foreground = Image.open(
+            my_path + "/blueno_original/blueno_cropped.png")
 
         background.paste(foreground, (0, 0), foreground)
-        background.show()
+        return background
+        # background.show()
 
-    def generate_image_masks():
-        # get the directory path of the current python file
-        my_path = os.path.dirname(__file__)
+    def generate_mask(self, thresh):
+        # # processed_image = Image.open(
+        # #     my_path + '/pngtree-random-energy-wave-background-image_307670.jpg', 'r')
+        # img_w, img_h = processed_image.size
+        # mask = Image.new('RGBA', (320, 240), (255, 255, 255, 255))
+        # bg_w, bg_h = mask.size
+        # # generate at multiple offsets
 
-        img = Image.open(
-            my_path + '/pngtree-random-energy-wave-background-image_307670.jpg', 'r')
-        img_w, img_h = img.size
-        background = Image.new('RGBA', (320, 240), (255, 255, 255, 255))
-        bg_w, bg_h = background.size
-        # generate at multiple offsets
+        background = Image.new('RGB', (320, 240), (255, 255, 255))
+        img = self.superimpose_bleuno(background)
 
-        offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
-        background.paste(img, offset)
-        background.save('out.png')
+        # offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+        # mask.paste(processed_image, offset)
+        def fn(x): return 255 if x < thresh else 0
 
-        ProcessDataset(my_path + "/background_images/images", 1)
+        # img.convert('L').point(fn, mode='1').save('foo.png')
+        mask = img.convert('L').point(fn, mode='1')
+
+        return mask
+        # mask.save('out.png')
+
+
+ProcessDataset(my_path + "/background_images/images", 1)
