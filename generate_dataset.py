@@ -49,7 +49,9 @@ class ProcessDataset():
         foreground = Image.open(
             my_path + "/blueno_original/blueno_cropped.png")
 
-        background.paste(foreground, (0, 0), foreground)
+        foreground.thumbnail((100, 100))
+
+        background.paste(foreground, (100, 80), foreground)
         return background
         # background.show()
 
