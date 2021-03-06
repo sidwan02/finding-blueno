@@ -16,29 +16,11 @@ class UnetDoubleConv(nn.Module):
             nn.Conv2d(out_channels, out_channels, kernel_size=3,
                       stride=1, padding=1),
             nn.ReLU(inplace=True)
-            # nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
     def forward(self, x):
         x = self.layer(x)
         return x
-
-
-# class UnetDoubleUpConv(nn.Module):
-#     def __init__(self, in_channels, out_channels):
-#         super(UnetDoubleUpConv, self).__init__()
-#         self.layer = nn.Sequential(
-#             nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3,
-#                                stride=1, padding=1),
-#             nn.ReLU(),
-#             nn.ConvTranspose2d(out_channels, out_channels, kernel_size=3,
-#                                stride=1, padding=1),
-#             nn.ReLU(),
-#             nn.MaxPool2d(kernel_size=2, stride=2))
-
-#     def forward(self, x):
-#         x = self.layer(x)
-#         return x
 
 
 class UNET(nn.Module):
@@ -51,9 +33,6 @@ class UNET(nn.Module):
         self.conv_layers = nn.ModuleList()
         self.up_conv_layers = nn.ModuleList()
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        in_channels = 3
-        out_channels = 1
 
         feature_index = 0
         while feature_index < feature_channels.size - 2:
@@ -107,8 +86,8 @@ class UNET(nn.Module):
             print('x shape: ', x.shape)
             print('skip_connection shape: ', skip_connection.shape)
 
-            if x.shape != skip_connection.shape:
-                x = TF.resize(x, size=skip_connection.shape[2:])
+            # if x.shape != skip_connection.shape:
+            #     x = TF.resize(x, size=skip_connection.shape[2:])
 
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.up_conv_layers[idx+1](concat_skip)
@@ -117,7 +96,7 @@ class UNET(nn.Module):
 
 
 def test():
-    x = torch.randn((3, 1, 161, 161))
+    x = torch.randn((3, 1, 160, 160))
     # model = UNET(in_channels=1, out_channels=1)
     model = UNET()
     preds = model(x)
