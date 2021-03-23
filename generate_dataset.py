@@ -19,8 +19,8 @@ class ProcessDataset():
         counter = 0
 
         for path in os.listdir(src_path):
-            if iter == counter:
-                break
+            # if iter == counter:
+            #     break
             # path contains name of the image
             inputPath = os.path.join(src_path, path)
             # print('input_path: ', inputPath)
