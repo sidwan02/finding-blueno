@@ -1,0 +1,5 @@
+data/
+/known_good/data/
+/known_good/saved_images/
+background_images/
+my_checkpoint.pth.tar

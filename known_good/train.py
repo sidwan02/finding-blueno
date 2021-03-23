@@ -5,6 +5,8 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 from model import UNET
+# from model_copy import UNET
+
 from utils import (
     load_checkpoint,
     save_checkpoint,
@@ -22,7 +24,7 @@ my_path = os.path.dirname(__file__)
 # Hyperparameters etc.
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 2
+BATCH_SIZE = 3
 NUM_EPOCHS = 3
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 160  # 1280 originally
