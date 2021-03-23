@@ -4,6 +4,8 @@ from PIL import ImageFilter
 
 my_path = os.path.dirname(__file__)
 
+# step 1
+
 
 class ProcessDataset():
     def __init__(self, src_path, iter):

@@ -1,3 +1,4 @@
+# https://medium.com/analytics-vidhya/creating-a-very-simple-u-net-model-with-pytorch-for-semantic-segmentation-of-satellite-images-223aa216e705
 # class TrainModel():
 #     def __init__(self, num_epochs, train_image_path, train_mask_path, test_image_path, test_mask_path, optimizer, loss_func):
 
@@ -16,7 +17,7 @@ import numpy as np
 my_path = os.path.dirname(__file__)
 
 
-def train(model, loss_fn, optimizer, acc_fn, epochs=1):
+def train(model, loss_fn, optimizer, acc_fn, epochs):
     # start = time.time()
     model.cuda()
 
@@ -43,26 +44,60 @@ def train(model, loss_fn, optimizer, acc_fn, epochs=1):
 
             x_arr = np.array(Image.open(
                 my_path + '\processed_images\images\processed_0000047.jpg').convert('RGB'))
+            # y_arr = np.array(Image.open(
+            #     my_path + '\processed_images/masks/mask_0000047.jpg').convert('L'))
+            y_arr = np.array(Image.open(
+                my_path + '\processed_images/masks/mask_0000047.jpg').convert('RGB'))
+
             # moves the channels so image is 3, ..., ...
             # x_arr = np.moveaxis(x_arr, -1, 0)
             # print('x_arr: ', x_arr)
             # add batch dimension using .unsqueeze
             #
             x = torch.from_numpy(x_arr).unsqueeze(0)
-            print(x.shape)
+            y = torch.from_numpy(y_arr)
+            # print(x.shape)
+            # print(y.shape)
             # make in the format of in_channels, batches, dim1, dim2
             # float conversion because conv2d cannot support byte
             # cuda because model is on GPU
             # x = x.permute(3, 0, 2, 1).float().cuda()
-            x = x.permute(0, 3, 2, 1).float().cuda()
+            # x = x.permute(0, 3, 2, 1).float().cuda()
+            x = x.permute(3, 0, 2, 1).float().cuda()
+            y = y.permute(2, 1, 0).long().cuda()
             print(x.shape)
-            outputs = model(x)
+            print(y.shape)
 
-            # you can give axis attribute if you wanna squeeze in specific dimension
-            arr = outputs.detach().cpu().numpy()
-            arr = np.squeeze(arr)
-            img = Image.fromarray(arr, 'RGB')
-            img.save('my.png')
+            if phase == 'train':
+                # zero the gradients
+                optimizer.zero_grad()
+                outputs = model(x)
+                # print(outputs)
+
+                # you can give axis attribute if you wanna squeeze in specific dimension
+                arr = outputs.detach().cpu().numpy()
+                arr = np.squeeze(arr)
+                img = Image.fromarray(arr, 'RGB')
+                img.save('my.png')
+
+                print(outputs.squeeze(1).shape)
+
+                loss = loss_fn(outputs.squeeze(1), y)
+
+                loss.backward()
+                optimizer.step()
+
+            else:
+                with torch.no_grad():
+                    outputs = model(x)
+                    arr = outputs.detach().cpu().numpy()
+                    arr = np.squeeze(arr)
+                    img = Image.fromarray(arr, 'RGB')
+                    img.save('my.png')
+
+                    print(outputs.squeeze(1).shape)
+
+                    loss = loss_fn(outputs.squeeze(1), y.long())
             # plt.imshow(arr)
             # plt.show()
 
@@ -122,8 +157,8 @@ def acc_metric(predb, yb):
     return (predb.argmax(dim=1) == yb.cuda()).float().mean()
 
 
-unet = UNET()
+unet = UNET(in_channels=1, out_channels=1)
 
 loss_fn = nn.CrossEntropyLoss()
 opt = torch.optim.Adam(unet.parameters(), lr=0.1)
-train_loss, valid_loss = train(unet, loss_fn, opt, acc_metric, 1)
+train_loss, valid_loss = train(unet, loss_fn, opt, acc_metric, 50)
