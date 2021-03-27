@@ -1,15 +1,18 @@
 import torch
 import torchvision
-from dataset import CarvanaDataset
+from dataset import getBluenoImages
 from torch.utils.data import DataLoader
 
-def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
-    print("=> Saving checkpoint")
-    torch.save(state, filename)
 
-def load_checkpoint(checkpoint, model):
-    print("=> Loading checkpoint")
-    model.load_state_dict(checkpoint["state_dict"])
+# def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+#     print("=> Saving checkpoint")
+#     torch.save(state, filename)
+
+
+# def load_checkpoint(checkpoint, model):
+#     print("=> Loading checkpoint")
+#     model.load_state_dict(checkpoint["state_dict"])
+
 
 def get_loaders(
     train_dir,
@@ -22,7 +25,7 @@ def get_loaders(
     num_workers=4,
     pin_memory=True,
 ):
-    train_ds = CarvanaDataset(
+    train_ds = getBluenoImages(
         image_dir=train_dir,
         mask_dir=train_maskdir,
         transform=train_transform,
@@ -36,7 +39,7 @@ def get_loaders(
         shuffle=True,
     )
 
-    val_ds = CarvanaDataset(
+    val_ds = getBluenoImages(
         image_dir=val_dir,
         mask_dir=val_maskdir,
         transform=val_transform,
@@ -51,6 +54,7 @@ def get_loaders(
     )
 
     return train_loader, val_loader
+
 
 def check_accuracy(loader, model, device="cuda"):
     num_correct = 0
@@ -75,6 +79,7 @@ def check_accuracy(loader, model, device="cuda"):
     )
     print(f"Dice score: {dice_score/len(loader)}")
     model.train()
+
 
 def save_predictions_as_imgs(
     loader, model, folder="saved_images/", device="cuda"

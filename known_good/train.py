@@ -4,12 +4,12 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
+# from model_known_good import UNET
 from model import UNET
-# from model_copy import UNET
 
 from utils import (
-    load_checkpoint,
-    save_checkpoint,
+    # load_checkpoint,
+    # save_checkpoint,
     get_loaders,
     check_accuracy,
     save_predictions_as_imgs,
@@ -22,11 +22,11 @@ from PIL import ImageFilter
 my_path = os.path.dirname(__file__)
 
 # Hyperparameters etc.
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-6
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 3
-NUM_EPOCHS = 3
-NUM_WORKERS = 2
+BATCH_SIZE = 4
+NUM_EPOCHS = 1
+NUM_WORKERS = 4
 IMAGE_HEIGHT = 160  # 1280 originally
 IMAGE_WIDTH = 240  # 1918 originally
 PIN_MEMORY = True
@@ -103,8 +103,8 @@ def main():
         PIN_MEMORY,
     )
 
-    if LOAD_MODEL:
-        load_checkpoint(torch.load("my_checkpoint.pth.tar"), model)
+    # if LOAD_MODEL:
+    #     load_checkpoint(torch.load("my_checkpoint.pth.tar"), model)
 
     check_accuracy(val_loader, model, device=DEVICE)
     scaler = torch.cuda.amp.GradScaler()
@@ -112,12 +112,12 @@ def main():
     for epoch in range(NUM_EPOCHS):
         train_fn(train_loader, model, optimizer, loss_fn, scaler)
 
-        # save model
-        checkpoint = {
-            "state_dict": model.state_dict(),
-            "optimizer": optimizer.state_dict(),
-        }
-        save_checkpoint(checkpoint)
+        # # save model
+        # checkpoint = {
+        #     "state_dict": model.state_dict(),
+        #     "optimizer": optimizer.state_dict(),
+        # }
+        # save_checkpoint(checkpoint)
 
         # check accuracy
         check_accuracy(val_loader, model, device=DEVICE)

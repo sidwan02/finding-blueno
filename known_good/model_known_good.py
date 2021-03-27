@@ -6,8 +6,6 @@ import torchvision.transforms.functional as TF
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DoubleConv, self).__init__()
-        print('in: ', in_channels)
-        print('out: ',  out_channels)
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
@@ -54,30 +52,30 @@ class UNET(nn.Module):
             x = down(x)
             skip_connections.append(x)
             x = self.pool(x)
+            # print(x.shape)
 
         x = self.bottleneck(x)
+        # print(x.shape)
         skip_connections = skip_connections[::-1]
-
-        print(len(self.ups))
 
         for idx in range(0, len(self.ups), 2):
             x = self.ups[idx](x)
+            # print("who")
+            # print(x.shape)
             skip_connection = skip_connections[idx//2]
 
-            print('x shape: ', x.shape)
-            print('skip_connection shape: ', skip_connection.shape)
-
-            # if x.shape != skip_connection.shape:
-            #     x = TF.resize(x, size=skip_connection.shape[2:])
+            if x.shape != skip_connection.shape:
+                x = TF.resize(x, size=skip_connection.shape[2:])
 
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[idx+1](concat_skip)
+            # print(x.shape)
 
         return self.final_conv(x)
 
 
 def test():
-    x = torch.randn((3, 1, 160, 160))
+    x = torch.randn((3, 1, 161, 161))
     model = UNET(in_channels=1, out_channels=1)
     preds = model(x)
     assert preds.shape == x.shape
