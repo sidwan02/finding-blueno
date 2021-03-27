@@ -52,12 +52,16 @@ class UNET(nn.Module):
             x = down(x)
             skip_connections.append(x)
             x = self.pool(x)
+            print(x.shape)
 
         x = self.bottleneck(x)
+        print(x.shape)
         skip_connections = skip_connections[::-1]
 
         for idx in range(0, len(self.ups), 2):
             x = self.ups[idx](x)
+            print("who")
+            print(x.shape)
             skip_connection = skip_connections[idx//2]
 
             if x.shape != skip_connection.shape:
@@ -65,6 +69,7 @@ class UNET(nn.Module):
 
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[idx+1](concat_skip)
+            print(x.shape)
 
         return self.final_conv(x)
 
