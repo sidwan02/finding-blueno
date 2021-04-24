@@ -3,31 +3,21 @@ import torchvision
 from dataset import getBluenoImages
 from torch.utils.data import DataLoader
 
+import os
 
-# def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
-#     print("=> Saving checkpoint")
-#     torch.save(state, filename)
-
-
-# def load_checkpoint(checkpoint, model):
-#     print("=> Loading checkpoint")
-#     model.load_state_dict(checkpoint["state_dict"])
+my_path = os.path.dirname(__file__)
 
 
 def get_loaders(
-    train_dir,
-    train_maskdir,
-    val_dir,
-    val_maskdir,
     batch_size,
     train_transform,
-    val_transform,
+    test_transform,
     num_workers=4,
     pin_memory=True,
 ):
     train_ds = getBluenoImages(
-        image_dir=train_dir,
-        mask_dir=train_maskdir,
+        image_dir=my_path + "\\data\\train_images\\",
+        mask_dir=my_path + "\\data\\train_masks\\",
         transform=train_transform,
     )
 
@@ -39,21 +29,21 @@ def get_loaders(
         shuffle=True,
     )
 
-    val_ds = getBluenoImages(
-        image_dir=val_dir,
-        mask_dir=val_maskdir,
-        transform=val_transform,
+    test_ds = getBluenoImages(
+        image_dir=my_path + "\\data\\test_images\\",
+        mask_dir=my_path + "\\data\\test_masks\\",
+        transform=test_transform,
     )
 
-    val_loader = DataLoader(
-        val_ds,
+    test_loader = DataLoader(
+        test_ds,
         batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=pin_memory,
         shuffle=False,
     )
 
-    return train_loader, val_loader
+    return train_loader, test_loader
 
 
 def check_accuracy(loader, model, device="cuda"):
@@ -85,14 +75,19 @@ def save_predictions_as_imgs(
     loader, model, folder="saved_images/", device="cuda"
 ):
     model.eval()
+    count = 0
     for idx, (x, y) in enumerate(loader):
-        x = x.to(device=device)
-        with torch.no_grad():
-            preds = torch.sigmoid(model(x))
-            preds = (preds > 0.5).float()
-        torchvision.utils.save_image(
-            preds, f"{folder}/pred_{idx}.png"
-        )
-        torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
+        if count > 10:
+            break
+        else:
+            x = x.to(device=device)
+            with torch.no_grad():
+                preds = torch.sigmoid(model(x))
+                preds = (preds > 0.5).float()
+            torchvision.utils.save_image(
+                preds, f"{folder}/pred_{idx}.png"
+            )
+            torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
+        count = count + 1
 
     model.train()

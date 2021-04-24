@@ -8,6 +8,7 @@ class UnetDoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UnetDoubleConv, self).__init__()
         # print('in: ', in_channels)
+        # https://github.com/zhixuhao/unet/issues/98
         # print('out: ',  out_channels)
         self.layer = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3,
