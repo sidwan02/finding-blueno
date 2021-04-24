@@ -2,6 +2,10 @@ import torch
 import torchvision
 from dataset import getBluenoImages
 from torch.utils.data import DataLoader
+from PIL import Image
+import imageio
+
+import numpy as np
 
 import os
 
@@ -20,6 +24,25 @@ def get_loaders(
         mask_dir=my_path + "\\data\\train_masks\\",
         transform=train_transform,
     )
+
+    # train images
+    train_data = []
+    count = 0
+    for path in os.listdir(my_path + "\\data\\train_images\\"):
+        inputPath = os.path.join(my_path + "\\data\\train_images\\", path)
+
+        img = Image.open(inputPath)
+
+        from skimage.io import imread
+
+        im = imageio.imread(inputPath)
+        # print(np.shape(im))
+        train_data.append(im)
+        count += 1
+    print("count: ", count)
+
+    train_data = np.array(train_data)
+    print(np.shape(train_data))
 
     train_loader = DataLoader(
         train_ds,

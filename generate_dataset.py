@@ -28,6 +28,8 @@ class ProcessDataset():
             # inputPath contains the full directory name
             img = Image.open(inputPath)
 
+            img = img.resize((320, 240))
+
             processed_image_path = os.path.join(
                 target_image, 'processed_' + path)
             mask_path = os.path.join(target_mask, 'mask_' + path)

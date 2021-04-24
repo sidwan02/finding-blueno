@@ -4,7 +4,8 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
-from model import UNET
+# from model import UNET
+from model_known_good import UNET
 
 from utils import (
     get_loaders,
@@ -13,40 +14,18 @@ from utils import (
 )
 
 # Hyperparameters etc.
-LEARNING_RATE = 1e-6
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 4
-NUM_EPOCHS = 1
-IMAGE_HEIGHT = 160
-IMAGE_WIDTH = 240
-
-
-def train_fn(loader, model, optimizer, loss_fn):
-    # loop = tqdm(loader)
-
-    # for batch_idx, (data, targets) in enumerate(loop):
-    for (data, targets) in loader:
-        data = data.to(device=DEVICE)
-        targets = targets.float().unsqueeze(1).to(device=DEVICE)
-
-        # forward
-        with torch.cuda.amp.autocast():
-            predictions = model(data)
-            loss = loss_fn(predictions, targets)
-
-        # backward
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # update tqdm loop
-        # loop.set_postfix(loss=loss.item())
+lr = 1e-6
+device = "cuda" if torch.cuda.is_available() else "cpu"
+batch_size = 1
+epochs = 1
+img_height = 160
+img_width = 240
 
 
 def main():
     train_transform = A.Compose(
         [
-            A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+            A.Resize(height=img_height, width=img_width),
             A.Normalize(
                 mean=[0.0, 0.0, 0.0],
                 std=[1.0, 1.0, 1.0],
@@ -56,9 +35,9 @@ def main():
         ],
     )
 
-    test_transforms = A.Compose(
+    test_transform = A.Compose(
         [
-            A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+            A.Resize(height=img_height, width=img_width),
             A.Normalize(
                 mean=[0.0, 0.0, 0.0],
                 std=[1.0, 1.0, 1.0],
@@ -68,27 +47,38 @@ def main():
         ],
     )
 
-    model = UNET(in_channels=3, out_channels=1).to(DEVICE)
-    loss_fn = nn.BCEWithLogitsLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    model = UNET(in_channels=3, out_channels=1).to(device)
+    loss_fun = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     train_loader, test_loader = get_loaders(
-        BATCH_SIZE,
+        batch_size,
         train_transform,
-        test_transforms,
+        test_transform,
     )
 
-    check_accuracy(test_loader, model, device=DEVICE)
+    check_accuracy(test_loader, model, device=device)
 
-    for epoch in range(NUM_EPOCHS):
-        train_fn(train_loader, model, optimizer, loss_fn)
+    for epoch in range(epochs):
+        for (pixel_data, target_masks) in train_loader:
+            pixel_data = pixel_data.to(device=device)
+            target_masks = target_masks.float().unsqueeze(1).to(device=device)
+
+            # forward
+            predictions = model(pixel_data)
+            loss = loss_fun(predictions, target_masks)
+
+            # backward
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
         # check accuracy
-        check_accuracy(test_loader, model, device=DEVICE)
+        check_accuracy(test_loader, model, device=device)
 
         # print some examples to a folder
         save_predictions_as_imgs(
-            test_loader, model, folder=my_path + "//saved_images//", device=DEVICE
+            test_loader, model, folder=my_path + "//saved_images//", device=device
         )
 
 
