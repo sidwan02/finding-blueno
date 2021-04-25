@@ -7,9 +7,7 @@ import numpy as np
 class UnetDoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UnetDoubleConv, self).__init__()
-        # print('in: ', in_channels)
         # https://github.com/zhixuhao/unet/issues/98
-        # print('out: ',  out_channels)
         self.layer = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3,
                       stride=1, padding=1, bias=False),
@@ -78,59 +76,11 @@ class UNET(nn.Module):
                                             feature_channels[1],
                                             kernel_size=2, stride=2)
 
-        # feature_index = 0
-        # while feature_index < feature_channels.size - 2:
-        #     if feature_index == 0:
-        #         self.down_conv_layers.append(UnetDoubleConv(
-        #             in_channels, feature_channels[feature_index + 1]))
-        #     else:
-        #         self.down_conv_layers.append(UnetDoubleConv(
-        #             feature_channels[feature_index], feature_channels[feature_index + 1]))
-
-        #     feature_index += 1
-
-        # reversed_feature_index = 0
-        # reversed_feature_channels = np.flip(feature_channels)
-        # # print(reversed_feature_channels)
-        # while reversed_feature_index < reversed_feature_channels.size - 2:
-        #     self.up_conv_layers.append(
-        #         nn.ConvTranspose2d(reversed_feature_channels[reversed_feature_index],
-        #                            reversed_feature_channels[reversed_feature_index + 1],
-        #                            kernel_size=2, stride=2))
-
-        #     self.up_conv_layers.append(UnetDoubleConv(
-        #         reversed_feature_channels[reversed_feature_index],
-        #         reversed_feature_channels[reversed_feature_index + 1]))
-
-        #     reversed_feature_index += 1
-
         self.bottom_conv = UnetDoubleConv(
             feature_channels[4], feature_channels[5])
         self.final_conv = nn.Conv2d(
             feature_channels[1], feature_channels[0], kernel_size=1)
 
-    # def forward(self, x):
-    #     upLayerResults = []
-
-    #     for down in self.down_conv_layers:
-    #         x = down(x)
-    #         upLayerResults.append(x)
-    #         x = self.pool(x)
-
-    #     x = self.bottom_conv(x)
-    #     upLayerResults = upLayerResults[::-1]
-
-    #     for idx in range(0, len(self.up_conv_layers), 2):
-    #         x = self.up_conv_layers[idx](x)
-    #         skip_connection = upLayerResults[idx//2]
-
-    #         if x.shape != skip_connection.shape:
-    #             x = TF.resize(x, size=skip_connection.shape[2:])
-
-    #         concat_skip = torch.cat((skip_connection, x), dim=1)
-    #         x = self.up_conv_layers[idx+1](concat_skip)
-
-    #     return self.final_conv(x)
     def forward(self, x):
         upLayerResults = []
 
@@ -202,19 +152,6 @@ class UNET(nn.Module):
         x = self.final_conv(x)
 
         return x
-        # upLayerResults = upLayerResults[::-1]
-
-        # for idx in range(0, len(self.up_conv_layers), 2):
-        #     x = self.up_conv_layers[idx](x)
-        #     skip_connection = upLayerResults[idx//2]
-
-        #     if x.shape != skip_connection.shape:
-        #         x = TF.resize(x, size=skip_connection.shape[2:])
-
-        #     concat_skip = torch.cat((skip_connection, x), dim=1)
-        #     x = self.up_conv_layers[idx+1](concat_skip)
-
-        # return self.final_conv(x)
 
 
 def test():
