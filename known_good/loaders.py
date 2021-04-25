@@ -27,7 +27,7 @@ transform = A.Compose(
 
 def get_loaders(
     batch_size,
-    num_workers=4,
+    num_workers=1,
     pin_memory=True,
 ):
 
@@ -156,23 +156,30 @@ def get_loaders(
 #     print(f"Dice score: {dice_score/len(loader)}")
 #     model.train()
 
-def check_accuracy(preds, y, device):
+def check_accuracy(preds, target, device):
     num_correct = 0
     num_pixels = 0
-    dice_score = 0
+    # dice_score = 0
 
-    y = y.to(device).unsqueeze(1)
-    preds = torch.sigmoid(preds)
+    # because this was unsqueezed in train.py
+    # target = target.to(device).squeeze(1)
+    preds = preds.to(device)
+    target = target.to(device)
+    # print(target)
+    preds = torch.sigmoid(preds).squeeze(1)
+    # print(preds)
+    # print(target.size())
+    # print(preds.size())
     preds = (preds > 0.5).float()
-    num_correct += (preds == y).sum()
+    num_correct += (preds == target).sum()
     num_pixels += torch.numel(preds)
-    # dice_score += (2 * (preds * y).sum()) / (
-    #     (preds + y).sum() + 1e-8
+    # dice_score += (2 * (preds * target).sum()) / (
+    #     (preds + target).sum() + 1e-8
     # )
 
-    print(
-        f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    )
+    # print(
+    #     f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
+    # )
     # print(f"Dice score: {dice_score/len(loader)}")
     # model.train()
 
@@ -185,12 +192,14 @@ def save_predictions_as_imgs(
     model.eval()
     count = 0
     for idx, (x, y) in enumerate(loader):
+        # print(y.size())
         if count > 10:
             break
         else:
             x = x.to(device=device)
             with torch.no_grad():
                 preds = torch.sigmoid(model(x))
+                # print(preds.size())
                 preds = (preds > 0.5).float()
             torchvision.utils.save_image(
                 preds, f"{folder}/pred_{idx}.png"
