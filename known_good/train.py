@@ -60,18 +60,29 @@ def main():
     check_accuracy(test_loader, model, device=device)
 
     for epoch in range(epochs):
-        for (pixel_data, target_masks) in train_loader:
+        loading_bar = tqdm(train_loader)
+
+        for _, (pixel_data, target_masks) in enumerate(loading_bar):
             pixel_data = pixel_data.to(device=device)
-            target_masks = target_masks.float().unsqueeze(1).to(device=device)
+            print(pixel_data.size())
+            # target_masks = target_masks.float().unsqueeze(1).to(device=device)
+            target_masks = target_masks.to(device=device)
+            print(target_masks.size())
+
+            # print(torch.transpose(pixel_data, 0, 1).size())
 
             # forward
             predictions = model(pixel_data)
+            print(predictions.size())
             loss = loss_fun(predictions, target_masks)
 
             # backward
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+            # update tqdm loading_bar
+            loading_bar.set_postfix(loss=loss.item())
 
         # check accuracy
         check_accuracy(test_loader, model, device=device)

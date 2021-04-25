@@ -84,7 +84,10 @@ def get_loaders(
         # # print(np.shape(im))
         # train_y.append(im)
         # mask = np.array(Image.open(inputPath).convert("L"), dtype=np.float32)
+
         image = np.array(Image.open(inputPath).convert("RGB"))
+        # image = np.array(Image.open(inputPath).convert("L"), dtype=np.float32)
+
         # print(image)
 
         train_transform = A.Compose(
@@ -192,6 +195,7 @@ def get_loaders(
         )
 
         image = np.array(Image.open(inputPath).convert("RGB"))
+        # image = np.array(Image.open(inputPath).convert("L"), dtype=np.float32)
 
         augmentations = test_transform(image=image)
 
