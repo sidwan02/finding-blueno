@@ -23,29 +23,29 @@ img_width = 240
 
 
 def main():
-    train_transform = A.Compose(
-        [
-            A.Resize(height=img_height, width=img_width),
-            A.Normalize(
-                mean=[0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0],
-                max_pixel_value=255.0,
-            ),
-            ToTensorV2(),
-        ],
-    )
+    # train_transform = A.Compose(
+    #     [
+    #         A.Resize(height=img_height, width=img_width),
+    #         A.Normalize(
+    #             mean=[0.0, 0.0, 0.0],
+    #             std=[1.0, 1.0, 1.0],
+    #             max_pixel_value=255.0,
+    #         ),
+    #         ToTensorV2(),
+    #     ],
+    # )
 
-    test_transform = A.Compose(
-        [
-            A.Resize(height=img_height, width=img_width),
-            A.Normalize(
-                mean=[0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0],
-                max_pixel_value=255.0,
-            ),
-            ToTensorV2(),
-        ],
-    )
+    # test_transform = A.Compose(
+    #     [
+    #         A.Resize(height=img_height, width=img_width),
+    #         A.Normalize(
+    #             mean=[0.0, 0.0, 0.0],
+    #             std=[1.0, 1.0, 1.0],
+    #             max_pixel_value=255.0,
+    #         ),
+    #         ToTensorV2(),
+    #     ],
+    # )
 
     model = UNET(in_channels=3, out_channels=1).to(device)
     loss_fun = nn.BCEWithLogitsLoss()
@@ -53,8 +53,8 @@ def main():
 
     train_loader, test_loader = get_loaders(
         batch_size,
-        train_transform,
-        test_transform,
+        # train_transform,
+        # test_transform,
     )
 
     check_accuracy(test_loader, model, device=device)

@@ -28,7 +28,7 @@ class ProcessDataset():
             # inputPath contains the full directory name
             img = Image.open(inputPath)
 
-            img = img.resize((320, 240))
+            img = img.resize((160, 240))
 
             processed_image_path = os.path.join(
                 target_image, 'processed_' + path)
@@ -63,11 +63,11 @@ class ProcessDataset():
         # # processed_image = Image.open(
         # #     my_path + '/pngtree-random-energy-wave-background-image_307670.jpg', 'r')
         # img_w, img_h = processed_image.size
-        # mask = Image.new('RGBA', (320, 240), (255, 255, 255, 255))
+        # mask = Image.new('RGBA', (160, 240), (255, 255, 255, 255))
         # bg_w, bg_h = mask.size
         # # generate at multiple offsets
 
-        background = Image.new('RGB', (320, 240), (255, 255, 255))
+        background = Image.new('RGB', (160, 240), (255, 255, 255))
         img = self.superimpose_bleuno(background)
 
         # offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
