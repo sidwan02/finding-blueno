@@ -102,7 +102,7 @@ def main():
 
     # save model upon training
     print("traning complete!")
-    torch.save(model.state_dict(), r"model" + "\blueno_detection.pth")
+    torch.save(model.state_dict(), r"model" + r"\blueno_detection.pth")
 
     for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
         pixel_data = pixel_data.to(device=device)
@@ -128,9 +128,9 @@ def main():
     )
 
     # print some examples to a folder
-    save_predictions_as_imgs(
-        test_loader, model, folder=my_path + "//saved_images//", device=device
-    )
+    # save_predictions_as_imgs(
+    #     test_loader, model, folder=my_path + "//saved_images//", device=device
+    # )
 
 
 if __name__ == "__main__":

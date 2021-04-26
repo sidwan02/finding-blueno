@@ -163,27 +163,3 @@ def check_accuracy(preds, target, device):
     # model.train()
 
     return (num_correct, num_pixels)
-
-
-def save_predictions_as_imgs(
-    loader, model, folder="saved_images/", device="cuda"
-):
-    model.eval()
-    count = 0
-    for idx, (x, y) in enumerate(loader):
-        # print(y.size())
-        if count > 10:
-            break
-        else:
-            x = x.to(device=device)
-            with torch.no_grad():
-                preds = torch.sigmoid(model(x))
-                # print(preds.size())
-                preds = (preds > 0.5).float()
-            torchvision.utils.save_image(
-                preds, f"{folder}/pred_{idx}.png"
-            )
-            torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
-        count = count + 1
-
-    model.train()
