@@ -106,55 +106,34 @@ def get_loaders(
     return train_loader, test_loader
 
 
-# def check_accuracy(predictions, target_masks):
+# def check_accuracy(x, y, model, device):
 #     num_correct = 0
 #     num_pixels = 0
-#     dice_score = 0
-#     # model.eval()
 
-#     # with torch.no_grad():
-#     #     for x, y in loader:
-#     #         x = x.to(device)
-#     #         y = y.to(device).unsqueeze(1)
-#     #         preds = torch.sigmoid(model(x))
-#     #         preds = (preds > 0.5).float()
-#     #         num_correct += (preds == y).sum()
-#     #         num_pixels += torch.numel(preds)
-#     #         dice_score += (2 * (preds * y).sum()) / (
-#     #             (preds + y).sum() + 1e-8
-#     #         )
-#     print(predictions)
-#     print(target_masks)
+#     x = x.to(device)
+#     y = y.to(device)
+#     y = torch.reshape(y, [1, 1 * 2 * 160 * 240]).data[0]
 
-#     print(
-#         f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-#     )
-#     print(f"Dice score: {dice_score/len(loader)}")
-#     model.train()
+#     preds = torch.sigmoid(model(x))
+#     preds = (preds > 0.5).float()
+#     preds = torch.reshape(preds, [1, 1 * 2 * 160 * 240]).data[0]
 
-# def check_accuracy(loader, model, device="cuda"):
-#     num_correct = 0
-#     num_pixels = 0
-#     dice_score = 0
-#     model.eval()
+#     # print(y)
 
-#     with torch.no_grad():
-#         for x, y in loader:
-#             x = x.to(device)
-#             y = y.to(device).unsqueeze(1)
-#             preds = torch.sigmoid(model(x))
-#             preds = (preds > 0.5).float()
-#             num_correct += (preds == y).sum()
-#             num_pixels += torch.numel(preds)
-#             dice_score += (2 * (preds * y).sum()) / (
-#                 (preds + y).sum() + 1e-8
-#             )
+#     # print(preds.size())
+#     # print(y.size())
 
-#     print(
-#         f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-#     )
-#     print(f"Dice score: {dice_score/len(loader)}")
-#     model.train()
+#     # for (pred_point, target_point) in zip(y, preds):
+#     #     # print(pred_point)
+#     #     if (pred_point == target_point):
+#     #         num_correct += 1
+
+#     #     num_pixels += 1
+
+#     num_correct = (preds == y).sum()
+#     num_pixels = torch.numel(preds)
+
+#     return (num_correct, num_pixels)
 
 def check_accuracy(preds, target, device):
     num_correct = 0

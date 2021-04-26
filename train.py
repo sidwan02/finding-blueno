@@ -1,164 +1,135 @@
-# https://medium.com/analytics-vidhya/creating-a-very-simple-u-net-model-with-pytorch-for-semantic-segmentation-of-satellite-images-223aa216e705
-# class TrainModel():
-#     def __init__(self, num_epochs, train_image_path, train_mask_path, test_image_path, test_mask_path, optimizer, loss_func):
-
-#         for epoch in range(num_epochs):
-#             running_loss = 0
-#             running_accuracy = 0
-
-from model_known_good import UNET
-import time
 import torch
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+from tqdm import tqdm
 import torch.nn as nn
-from PIL import Image
-import os
-import numpy as np
+import torch.optim as optim
+from model import UNET
+# from model_known_good import UNET
 
+from loaders import (
+    get_loaders,
+    check_accuracy,
+    save_predictions_as_imgs,
+)
+
+import os
 my_path = os.path.dirname(__file__)
 
 
-def train(model, loss_fn, optimizer, acc_fn, epochs):
-    # start = time.time()
-    model.cuda()
+# Hyperparameters etc.
+lr = 1e-6
+device = "cuda" if torch.cuda.is_available() else "cpu"
+batch_size = 1
+epochs = 5
+img_height = 160
+img_width = 240
 
-    train_loss, valid_loss = [], []
 
-    best_acc = 0.0
+def main():
+
+    model = UNET(in_channels=3, out_channels=1).to(device)
+    loss_fun = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    train_loader, test_loader = get_loaders(
+        batch_size
+    )
+
+    # check_accuracy(test_loader, model, device=device)
 
     for epoch in range(epochs):
-        print('Epoch {}/{}'.format(epoch, epochs - 1))
-        print('-' * 10)
+        train_loading_bar = tqdm(train_loader)
+        model.train()
 
-        for phase in ['train', 'valid']:
-            if phase == 'train':
-                model.train(True)  # Set trainind mode = true
-                # dataloader = train_dl
-            else:
-                model.train(False)  # Set model to evaluate mode
-                # dataloader = valid_dl
+        train_correct_pixels = 0
+        train_total_pixels = 0
 
-            running_loss = 0.0
-            running_acc = 0.0
+        # save_predictions_as_imgs(
+        #     test_loader, model, folder=my_path + "//saved_images//", device=device
+        # )
 
-            step = 0
+        for _, (pixel_data, target_masks) in enumerate(train_loading_bar):
+            pixel_data = pixel_data.to(device=device)
+            # print(pixel_data.size())
+            target_masks_unsqueezed = target_masks.float().unsqueeze(1).to(device=device)
+            # target_masks_unsqueezed = target_masks_unsqueezed.to(device=device)
+            # print(target_masks_unsqueezed.size())
 
-            x_arr = np.array(Image.open(
-                my_path + '\processed_images\images\processed_0000047.jpg').convert('RGB'))
-            # y_arr = np.array(Image.open(
-            #     my_path + '\processed_images/masks/mask_0000047.jpg').convert('L'))
-            y_arr = np.array(Image.open(
-                my_path + '\processed_images/masks/mask_0000047.jpg').convert('RGB'))
+            # print(torch.transpose(pixel_data, 0, 1).size())
+            model.zero_grad()
 
-            # moves the channels so image is 3, ..., ...
-            # x_arr = np.moveaxis(x_arr, -1, 0)
-            # print('x_arr: ', x_arr)
-            # add batch dimension using .unsqueeze
-            #
-            x = torch.from_numpy(x_arr).unsqueeze(0)
-            y = torch.from_numpy(y_arr)
-            # print(x.shape)
-            # print(y.shape)
-            # make in the format of in_channels, batches, dim1, dim2
-            # float conversion because conv2d cannot support byte
-            # cuda because model is on GPU
-            # x = x.permute(3, 0, 2, 1).float().cuda()
-            # x = x.permute(0, 3, 2, 1).float().cuda()
-            x = x.permute(3, 0, 2, 1).float().cuda()
-            y = y.permute(2, 1, 0).long().cuda()
-            print(x.shape)
-            print(y.shape)
+            predictions = model(pixel_data)
+            # print(predictions.size())
+            loss = loss_fun(predictions, target_masks_unsqueezed)
+            loss.backward()
 
-            if phase == 'train':
-                # zero the gradients
-                optimizer.zero_grad()
-                outputs = model(x)
-                # print(outputs)
+            (total_pixels, correct_pixels) = check_accuracy(
+                predictions, target_masks, device)
+            # (total_pixels, correct_pixels) = check_accuracy(
+            #     pixel_data, target_masks, model, device)
 
-                # you can give axis attribute if you wanna squeeze in specific dimension
-                arr = outputs.detach().cpu().numpy()
-                arr = np.squeeze(arr)
-                img = Image.fromarray(arr, 'RGB')
-                img.save('my.png')
+            train_correct_pixels = train_correct_pixels + correct_pixels
+            train_total_pixels = train_total_pixels + total_pixels
 
-                print(outputs.squeeze(1).shape)
+            optimizer.step()
 
-                loss = loss_fn(outputs.squeeze(1), y)
+            # update tqdm train_loading_bar
+            train_loading_bar.set_postfix(loss=loss.item())
 
-                loss.backward()
-                optimizer.step()
+            # print(
+            #     f"{correct_pixels/total_pixels*100:.2f}"
+            # )
 
-            else:
-                with torch.no_grad():
-                    outputs = model(x)
-                    arr = outputs.detach().cpu().numpy()
-                    arr = np.squeeze(arr)
-                    img = Image.fromarray(arr, 'RGB')
-                    img.save('my.png')
+        model.eval()
 
-                    print(outputs.squeeze(1).shape)
+        # check_accuracy
+        print(
+            f"Train Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
+        )
 
-                    loss = loss_fn(outputs.squeeze(1), y.long())
-            # plt.imshow(arr)
-            # plt.show()
+        # print some examples to a folder
+        # save_predictions_as_imgs(
+        #     test_loader, model, folder=my_path + "//saved_images//", device=device
+        # )
 
-            # iterate over data
-            # for x, y in dataloader:
-            #     x = x.cuda()
-            #     y = y.cuda()
-            #     step += 1
+        test_loading_bar = tqdm(test_loader)
 
-            # forward pass
-            # if phase == 'train':
-            #     # zero the gradients
-            #     optimizer.zero_grad()
-            #     outputs = model(x)
-            #     loss = loss_fn(outputs, y)
+        test_correct_pixels = 0
+        test_total_pixels = 0
 
-            #     # the backward pass frees the graph memory, so there is no
-            #     # need for torch.no_grad in this training pass
-            #     loss.backward()
-            #     optimizer.step()
-            #     # scheduler.step()
+    # # save model upon training
+    # print("traning complete!")
+    # torch.save(model.state_dict(), r"C:\Users\sidwa\OneDrive\OneDriveNew\Personal\Sid\Brown University\Courses\Computer Science\CSCI 0320\Assignments\term-project-rfameli1-sdiwan2-tfernan4-tzaw\server\model" + "\sentiment_model.pth")
 
-            # else:
-            #     with torch.no_grad():
-            #         outputs = model(x)
-            #         loss = loss_fn(outputs, y.long())
+    for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
+        pixel_data = pixel_data.to(device=device)
+        # print(pixel_data.size())
+        target_masks = target_masks.float().unsqueeze(1).to(device=device)
+        # target_masks = target_masks.to(device=device)
+        # print(target_masks.size())
 
-            #     # stats - whatever is the phase
-            #     acc = acc_fn(outputs, y)
+        predictions = model(pixel_data)
+        # print(predictions.size())
+        # (total_pixels, correct_pixels) = check_accuracy(
+        #     pixel_data, target_masks, model, device)
+        (total_pixels, correct_pixels) = check_accuracy(
+            predictions, target_masks, device)
 
-            #     running_acc += acc*dataloader.batch_size
-            #     running_loss += loss*dataloader.batch_size
+        test_loading_bar.set_postfix(loss=loss.item())
 
-            #     if step % 10 == 0:
-            #         # clear_output(wait=True)
-            #         print('Current step: {}  Loss: {}  Acc: {}  AllocMem (Mb): {}'.format(
-            #             step, loss, acc, torch.cuda.memory_allocated()/1024/1024))
-            #         # print(torch.cuda.memory_summary())
+        test_correct_pixels += correct_pixels
+        test_total_pixels += total_pixels
 
-            # epoch_loss = running_loss / 1
-            # epoch_acc = running_acc / 1
+    print(
+        f"Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
+    )
 
-            # print('{} Loss: {:.4f} Acc: {}'.format(
-            #     phase, epoch_loss, epoch_acc))
-
-            # train_loss.append(
-            #     epoch_loss) if phase == 'train' else valid_loss.append(epoch_loss)
-
-    # time_elapsed = time.time() - start
-    # print('Training complete in {:.0f}m {:.0f}s'.format(
-    #     time_elapsed // 60, time_elapsed % 60))
-
-    return train_loss, valid_loss
+    # print some examples to a folder
+    save_predictions_as_imgs(
+        test_loader, model, folder=my_path + "//saved_images//", device=device
+    )
 
 
-def acc_metric(predb, yb):
-    return (predb.argmax(dim=1) == yb.cuda()).float().mean()
-
-
-unet = UNET(in_channels=1, out_channels=1)
-
-loss_fn = nn.CrossEntropyLoss()
-opt = torch.optim.Adam(unet.parameters(), lr=0.1)
-train_loss, valid_loss = train(unet, loss_fn, opt, acc_metric, 50)
+if __name__ == "__main__":
+    main()
