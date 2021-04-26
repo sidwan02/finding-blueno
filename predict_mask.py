@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image
 import albumentations as A
 from torch.utils.data import TensorDataset, DataLoader
+from tqdm import tqdm
+import torchvision
 
 from albumentations.pytorch import ToTensorV2
 
@@ -46,7 +48,10 @@ def generate_masks():
 
     test_x = []
 
+    image_names = []
+
     for path_img in os.listdir(my_path + "/test_model/test_images"):
+        image_names.append(path_img)
         full_path_img = os.path.join(
             my_path + "/test_model/test_images", path_img)
 
@@ -59,7 +64,7 @@ def generate_masks():
     test_x = torch.stack(test_x)
 
     test_data = TensorDataset(
-        test_x)
+        test_x, test_x)
 
     test_loader = DataLoader(
         test_data,
@@ -72,25 +77,28 @@ def generate_masks():
     # print(test_loader)
 
     save_predictions_as_imgs(
-        test_loader, model, "test_model/generated_masks/", device)
+        test_loader, model, image_names, "test_model/generated_masks/", device)
 
 
 def save_predictions_as_imgs(
-    test_loader, model, target_folder, device
+    test_loader, model, image_names, target_folder, device,
 ):
     test_loading_bar = tqdm(test_loader, position=0, leave=True)
 
-    for _, (pixel_data) in enumerate(test_loading_bar):
-        x = x.to(device=device)
+    count = 0
+    for _, (pixel_data, _) in enumerate(test_loading_bar):
+        # print(pixel_data)
+        pixel_data = pixel_data.to(device=device)
         with torch.no_grad():
-            preds = torch.sigmoid(model(x))
+            preds = torch.sigmoid(model(pixel_data))
 
             preds = (preds > 0.5).float()
         torchvision.utils.save_image(
-            preds, f"{target_folder}/pred_{idx}.png"
+            preds, f"{target_folder}/prediction_{image_names[count]}"
         )
-        torchvision.utils.save_image(
-            y.unsqueeze(1), f"{target_folder}{idx}.png")
+        # torchvision.utils.save_image(
+        #     y.unsqueeze(1), f"{target_folder}{idx}.png")
+        count += 1
 
 
 if __name__ == '__main__':
