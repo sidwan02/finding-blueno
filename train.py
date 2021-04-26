@@ -10,7 +10,7 @@ from model import UNET
 from loaders import (
     get_loaders,
     check_accuracy,
-    save_predictions_as_imgs,
+    # save_predictions_as_imgs,
 )
 
 import os
@@ -40,8 +40,11 @@ def main():
 
     # check_accuracy(test_loader, model, device=device)
 
+    epoch_count = 1
     for epoch in range(epochs):
-        train_loading_bar = tqdm(train_loader)
+        print("Epoch ", epoch_count)
+        print("=========")
+        train_loading_bar = tqdm(train_loader, position=0, leave=True)
         model.train()
 
         train_correct_pixels = 0
@@ -51,7 +54,9 @@ def main():
         #     test_loader, model, folder=my_path + "//saved_images//", device=device
         # )
 
+        count = 0
         for _, (pixel_data, target_masks) in enumerate(train_loading_bar):
+            count += 1
             pixel_data = pixel_data.to(device=device)
             # print(pixel_data.size())
             target_masks_unsqueezed = target_masks.float().unsqueeze(1).to(device=device)
@@ -66,7 +71,7 @@ def main():
             loss = loss_fun(predictions, target_masks_unsqueezed)
             loss.backward()
 
-            (total_pixels, correct_pixels) = check_accuracy(
+            (correct_pixels, total_pixels) = check_accuracy(
                 predictions, target_masks, device)
             # (total_pixels, correct_pixels) = check_accuracy(
             #     pixel_data, target_masks, model, device)
@@ -79,58 +84,63 @@ def main():
             # update tqdm train_loading_bar
             train_loading_bar.set_postfix(loss=loss.item())
 
-            # print(
-            #     f"{correct_pixels/total_pixels*100:.2f}"
-            # )
+            if (count % 50 == 0):
+                print(
+                    f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
+                )
 
         model.eval()
 
+        epoch_count += 1
+
         # check_accuracy
-        print(
-            f"Train Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
-        )
+        # print(
+        #     f"Train Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
+        # )
 
         # print some examples to a folder
         # save_predictions_as_imgs(
         #     test_loader, model, folder=my_path + "//saved_images//", device=device
         # )
 
-        test_loading_bar = tqdm(test_loader)
-
-        test_correct_pixels = 0
-        test_total_pixels = 0
-
     # save model upon training
     print("traning complete!")
     torch.save(model.state_dict(), r"model" + r"\blueno_detection.pth")
 
-    for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
-        pixel_data = pixel_data.to(device=device)
-        # print(pixel_data.size())
-        target_masks = target_masks.float().unsqueeze(1).to(device=device)
-        # target_masks = target_masks.to(device=device)
-        # print(target_masks.size())
+    test_loading_bar = tqdm(test_loader)
 
-        predictions = model(pixel_data)
-        # print(predictions.size())
-        # (total_pixels, correct_pixels) = check_accuracy(
-        #     pixel_data, target_masks, model, device)
-        (total_pixels, correct_pixels) = check_accuracy(
-            predictions, target_masks, device)
+    test_correct_pixels = 0
+    test_total_pixels = 0
 
-        test_loading_bar.set_postfix(loss=loss.item())
+    # count = 0
+    # for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
+    #     count += 1
+    #     pixel_data = pixel_data.to(device=device)
+    #     # print(pixel_data.size())
+    #     target_masks = target_masks.float().unsqueeze(1).to(device=device)
+    #     # target_masks = target_masks.to(device=device)
+    #     # print(target_masks.size())
 
-        test_correct_pixels += correct_pixels
-        test_total_pixels += total_pixels
+    #     predictions = model(pixel_data)
+    #     # print(predictions.size())
+    #     # (total_pixels, correct_pixels) = check_accuracy(
+    #     #     pixel_data, target_masks, model, device)
+    #     (correct_pixels, total_pixels) = check_accuracy(
+    #         predictions, target_masks, device)
 
-    print(
-        f"Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
-    )
+    #     test_loading_bar.set_postfix(loss=loss.item())
 
-    # print some examples to a folder
-    # save_predictions_as_imgs(
-    #     test_loader, model, folder=my_path + "//saved_images//", device=device
-    # )
+    #     test_correct_pixels += correct_pixels
+    #     test_total_pixels += total_pixels
+    #     # if (count % 50=0):
+    #     #     print(
+    #     #         f"Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
+    #     #     )
+
+    # # print some examples to a folder
+    # # save_predictions_as_imgs(
+    # #     test_loader, model, folder=my_path + "//saved_images//", device=device
+    # # )
 
 
 if __name__ == "__main__":
