@@ -36,6 +36,8 @@ def main():
         batch_size
     )
 
+    # torch.save(model.state_dict(), r"model" + r"\blueno_detection.pth")
+
     # check_accuracy(test_loader, model, device=device)
 
     for epoch in range(epochs):
@@ -98,9 +100,9 @@ def main():
         test_correct_pixels = 0
         test_total_pixels = 0
 
-    # # save model upon training
-    # print("traning complete!")
-    # torch.save(model.state_dict(), r"C:\Users\sidwa\OneDrive\OneDriveNew\Personal\Sid\Brown University\Courses\Computer Science\CSCI 0320\Assignments\term-project-rfameli1-sdiwan2-tfernan4-tzaw\server\model" + "\sentiment_model.pth")
+    # save model upon training
+    print("traning complete!")
+    torch.save(model.state_dict(), r"model" + "\blueno_detection.pth")
 
     for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
         pixel_data = pixel_data.to(device=device)
