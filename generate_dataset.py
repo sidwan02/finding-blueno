@@ -38,7 +38,7 @@ class ProcessDataset():
 
             mask.save(mask_path)
             # print("here")
-            break
+            # break
 
     def get_img_superposition_state(self):
         if self.restricted:  # centered
@@ -88,7 +88,7 @@ class ProcessDataset():
         return mask
 
 
-ProcessDataset(src_path=my_path + "/background_images/images",
-               target_image_path=my_path + "/processed_images/images",
-               target_mask_path=my_path + "/processed_images/masks",
+ProcessDataset(src_path=my_path + "\\background_images\\images",
+               target_image_path=my_path + "\\data\\train_images",
+               target_mask_path=my_path + "\\data\\train_masks",
                restricted=False)
