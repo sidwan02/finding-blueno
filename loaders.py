@@ -41,8 +41,6 @@ def get_loaders(
         full_path_mask = os.path.join(
             my_path + "\\data\\train_masks\\", path_mask)
 
-        from skimage.io import imread
-
         image = np.array(Image.open(full_path_img).convert("RGB"))
         mask = np.array(Image.open(full_path_mask).convert("L"),
                         dtype=np.float32)
@@ -106,60 +104,17 @@ def get_loaders(
     return train_loader, test_loader
 
 
-# def check_accuracy(x, y, model, device):
-#     num_correct = 0
-#     num_pixels = 0
-
-#     x = x.to(device)
-#     y = y.to(device)
-#     y = torch.reshape(y, [1, 1 * 2 * 160 * 240]).data[0]
-
-#     preds = torch.sigmoid(model(x))
-#     preds = (preds > 0.5).float()
-#     preds = torch.reshape(preds, [1, 1 * 2 * 160 * 240]).data[0]
-
-#     # print(y)
-
-#     # print(preds.size())
-#     # print(y.size())
-
-#     # for (pred_point, target_point) in zip(y, preds):
-#     #     # print(pred_point)
-#     #     if (pred_point == target_point):
-#     #         num_correct += 1
-
-#     #     num_pixels += 1
-
-#     num_correct = (preds == y).sum()
-#     num_pixels = torch.numel(preds)
-
-#     return (num_correct, num_pixels)
-
 def check_accuracy(preds, target, device):
     num_correct = 0
     num_pixels = 0
-    # dice_score = 0
 
-    # because this was unsqueezed in train.py
-    # target = target.to(device).squeeze(1)
     preds = preds.to(device)
     target = target.to(device)
-    # print(target)
+
     preds = torch.sigmoid(preds).squeeze(1)
-    # print(preds)
-    # print(target.size())
-    # print(preds.size())
+
     preds = (preds > 0.5).float()
     num_correct += (preds == target).sum()
     num_pixels += torch.numel(preds)
-    # dice_score += (2 * (preds * target).sum()) / (
-    #     (preds + target).sum() + 1e-8
-    # )
-
-    # print(
-    #     f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    # )
-    # print(f"Dice score: {dice_score/len(loader)}")
-    # model.train()
 
     return (num_correct, num_pixels)

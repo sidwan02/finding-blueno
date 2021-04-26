@@ -4,3 +4,6 @@ data/
 background_images/
 my_checkpoint.pth.tar
 processed_images/
+blueno_detection.pth
+test_images/
+generated_masks/
