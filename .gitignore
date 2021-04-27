@@ -3,7 +3,7 @@ data/
 /known_good/saved_images/
 background_images/
 my_checkpoint.pth.tar
-processed_images/
 blueno_detection.pth
 test_images/
 generated_masks/
+_pycache_/

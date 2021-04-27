@@ -53,7 +53,7 @@ class UNET(nn.Module):
             feature_channels[5], feature_channels[4])
 
         self.up_conv_1 = nn.ConvTranspose2d(
-            feature_channels[5],                                feature_channels[4],                                   kernel_size=2, stride=2)
+            feature_channels[5], feature_channels[4],                                   kernel_size=2, stride=2)
 
         self.up_layer_2 = UnetDoubleConv(
             feature_channels[4], feature_channels[3])

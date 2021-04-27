@@ -71,7 +71,7 @@ def generate_masks():
         batch_size=1,
         num_workers=1,
         pin_memory=True,
-        shuffle=True,
+        shuffle=False,
     )
 
     # print(test_loader)

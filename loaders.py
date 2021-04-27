@@ -2,12 +2,9 @@ import torch
 import torchvision
 from torch.utils.data import TensorDataset, DataLoader
 from PIL import Image
-
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-
 import numpy as np
-
 import os
 
 my_path = os.path.dirname(__file__)
