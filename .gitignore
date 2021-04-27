@@ -6,4 +6,4 @@ my_checkpoint.pth.tar
 blueno_detection.pth
 test_images/
 generated_masks/
-_pycache_/
+__pycache__/
