@@ -71,10 +71,6 @@ def main():
             # update tqdm train_loading_bar
             train_loading_bar.set_postfix(loss=loss.item())
 
-            # if (count % 50 == 0):
-            #     print(
-            #         f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
-            #     )
         print(
             f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
         )

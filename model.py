@@ -33,8 +33,6 @@ class UNET(nn.Module):
         base = 2
         feature_channels = np.power(base, feature_channel_powers)
 
-        # print(feature_channels)
-
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         self.down_layer_1 = UnetDoubleConv(
@@ -88,80 +86,50 @@ class UNET(nn.Module):
         x = self.down_layer_1(x)
         upLayerResults.append(x)
         x = self.pool(x)
-        # print(x.shape)
+
         x = self.down_layer_2(x)
         upLayerResults.append(x)
         x = self.pool(x)
-        # print(x.shape)
+
         x = self.down_layer_3(x)
         upLayerResults.append(x)
         x = self.pool(x)
-        # print(x.shape)
+
         x = self.down_layer_4(x)
         upLayerResults.append(x)
         x = self.pool(x)
-        # print(x.shape)
 
         # bottom
         x = self.bottom_conv(x)
-        # print(x.shape)
 
         upLayerResults = upLayerResults[::-1]
-        # print(len(upLayerResults))
 
         # up
         x = self.up_conv_1(x)
-        # print("up 1", x.shape)
         skip_connection = upLayerResults[0]
-        # # print("skip", skip_connection.shape)
         x = TF.resize(x, size=skip_connection.shape[2:])
-        # # print("new_size", x.shape)
         concat_skip = torch.cat((skip_connection, x), dim=1)
         x = self.up_layer_1(concat_skip)
-        # # print("up conv", x.shape)
-        # print(x.shape)
 
         x = self.up_conv_2(x)
-        # # print("up 2", x.shape)
         skip_connection = upLayerResults[1]
-        # # print("skip 2", skip_connection.shape)
         x = TF.resize(x, size=skip_connection.shape[2:])
-        # # print("resize 2", x.shape)
         concat_skip = torch.cat((skip_connection, x), dim=1)
         x = self.up_layer_2(concat_skip)
-        # print(x.shape)
 
-        # # print("wow")
         x = self.up_conv_3(x)
         skip_connection = upLayerResults[2]
         x = TF.resize(x, size=skip_connection.shape[2:])
         concat_skip = torch.cat((skip_connection, x), dim=1)
         x = self.up_layer_3(concat_skip)
-        # print(x.shape)
 
         x = self.up_conv_4(x)
         skip_connection = upLayerResults[3]
         x = TF.resize(x, size=skip_connection.shape[2:])
         concat_skip = torch.cat((skip_connection, x), dim=1)
         x = self.up_layer_4(concat_skip)
-        # print(x.shape)
-
-        # print("hihahahah")
 
         # final
         x = self.final_conv(x)
 
         return x
-
-
-def test():
-    x = torch.randn((3, 1, 161, 161))
-    model = UNET(in_channels=1, out_channels=1)
-    preds = model(x)
-    # print(preds.shape)
-    # print(x.shape)
-    assert preds.shape == x.shape
-
-
-if __name__ == "__main__":
-    test()

@@ -8,12 +8,9 @@ from torch.utils.data import TensorDataset, DataLoader
 from tqdm import tqdm
 import torchvision
 from pathlib import Path
-
-
 from albumentations.pytorch import ToTensorV2
 
 my_path = os.path.dirname(__file__)
-
 
 transform = A.Compose(
     [
@@ -76,8 +73,6 @@ def generate_masks():
         shuffle=False,
     )
 
-    # print(test_loader)
-
     Path(my_path + "/test_model/generated_masks/").mkdir(parents=True, exist_ok=True)
 
     for file in os.listdir(my_path + "/test_model/generated_masks/"):
@@ -94,7 +89,6 @@ def save_predictions_as_imgs(
 
     count = 0
     for _, (pixel_data, _) in enumerate(test_loading_bar):
-        # print(pixel_data)
         pixel_data = pixel_data.to(device=device)
         with torch.no_grad():
             preds = torch.sigmoid(model(pixel_data))
@@ -103,8 +97,7 @@ def save_predictions_as_imgs(
         torchvision.utils.save_image(
             preds, f"{target_folder}/prediction_{image_names[count]}"
         )
-        # torchvision.utils.save_image(
-        #     y.unsqueeze(1), f"{target_folder}{idx}.png")
+
         count += 1
 
 
