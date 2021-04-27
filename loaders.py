@@ -22,12 +22,7 @@ transform = A.Compose(
 )
 
 
-def get_loaders(
-    batch_size,
-    num_workers=1,
-    pin_memory=True,
-):
-
+def get_loaders(batch_size, num_workers=1, pin_memory=True):
     train_x = []
     train_y = []
 
