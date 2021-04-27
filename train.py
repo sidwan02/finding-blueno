@@ -86,35 +86,27 @@ def main():
     test_correct_pixels = 0
     test_total_pixels = 0
 
-    # count = 0
-    # for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
-    #     count += 1
-    #     pixel_data = pixel_data.to(device=device)
-    #     # print(pixel_data.size())
-    #     target_masks = target_masks.float().unsqueeze(1).to(device=device)
-    #     # target_masks = target_masks.to(device=device)
-    #     # print(target_masks.size())
+    count = 0
+    for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
+        count += 1
+        pixel_data = pixel_data.to(device=device)
+        target_masks_unsqueezed = target_masks.float().unsqueeze(1).to(device=device)
 
-    #     predictions = model(pixel_data)
-    #     # print(predictions.size())
-    #     # (total_pixels, correct_pixels) = check_accuracy(
-    #     #     pixel_data, target_masks, model, device)
-    #     (correct_pixels, total_pixels) = check_accuracy(
-    #         predictions, target_masks, device)
+        predictions = model(pixel_data)
 
-    #     test_loading_bar.set_postfix(loss=loss.item())
+        (correct_pixels, total_pixels) = check_accuracy(
+            predictions, target_masks, device)
 
-    #     test_correct_pixels += correct_pixels
-    #     test_total_pixels += total_pixels
-    #     # if (count % 50=0):
-    #     #     print(
-    #     #         f"Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
-    #     #     )
+        test_correct_pixels = test_correct_pixels + correct_pixels
+        test_total_pixels = test_total_pixels + total_pixels
 
-    # # print some examples to a folder
-    # # save_predictions_as_imgs(
-    # #     test_loader, model, folder=my_path + "//saved_images//", device=device
-    # # )
+        # update tqdm test_loading_bar
+        test_loading_bar.set_postfix(loss=loss.item())
+
+        if (count % 50 == 0):
+            print(
+                f"\Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
+            )
 
 
 if __name__ == "__main__":

@@ -7,12 +7,15 @@ my_path = os.path.dirname(__file__)
 
 
 class ProcessDataset():
-    def __init__(self, src_path, target_image_path, target_mask_path, restricted):
+    def __init__(self, src_path, train_image_path, train_mask_path, test_image_path, test_mask_path, restricted):
         self.src_path = src_path
-        self.target_image_path = target_image_path
-        self.target_mask_path = target_mask_path
+        self.train_image_path = train_image_path
+        self.train_mask_path = train_mask_path
+        self.test_image_path = test_image_path
+        self.test_mask_path = test_mask_path
         self.restricted = restricted
 
+        count = 1
         for path in os.listdir(self.src_path):
             inputPath = os.path.join(self.src_path, path)
 
@@ -21,9 +24,14 @@ class ProcessDataset():
 
             img = img.resize((240, 160))
 
-            processed_image_path = os.path.join(
-                self.target_image_path, 'processed_' + path)
-            mask_path = os.path.join(self.target_mask_path, 'mask_' + path)
+            if count % 10 == 0:
+                processed_image_path = os.path.join(
+                    self.test_image_path, 'processed_' + path)
+                mask_path = os.path.join(self.test_mask_path, 'mask_' + path)
+            else:
+                processed_image_path = os.path.join(
+                    self.train_image_path, 'processed_' + path)
+                mask_path = os.path.join(self.train_mask_path, 'mask_' + path)
 
             (scale_factor, horizontal_pos,
              vertical_pos) = self.get_img_superposition_state()
@@ -33,12 +41,14 @@ class ProcessDataset():
 
             processed_img.save(processed_image_path)
 
-            mask = self.generate_mask(thresh=255, scale_factor=scale_factor, horizontal_pos=horizontal_pos,
-                                      vertical_pos=vertical_pos)
+            mask = self.generate_mask(thresh=255, scale_factor=scale_factor,
+                                      horizontal_pos=horizontal_pos, vertical_pos=vertical_pos)
 
             mask.save(mask_path)
             # print("here")
             # break
+
+            count += 1
 
     def get_img_superposition_state(self):
         if self.restricted:  # centered
@@ -89,6 +99,8 @@ class ProcessDataset():
 
 
 ProcessDataset(src_path=my_path + "\\background_images\\images",
-               target_image_path=my_path + "\\data\\train_images",
-               target_mask_path=my_path + "\\data\\train_masks",
+               train_image_path=my_path + "\\data\\train_images",
+               train_mask_path=my_path + "\\data\\train_masks",
+               test_image_path=my_path + "\\data\\test_images",
+               test_mask_path=my_path + "\\data\\test_masks",
                restricted=False)
