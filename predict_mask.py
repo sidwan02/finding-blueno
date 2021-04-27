@@ -7,6 +7,8 @@ import albumentations as A
 from torch.utils.data import TensorDataset, DataLoader
 from tqdm import tqdm
 import torchvision
+from pathlib import Path
+
 
 from albumentations.pytorch import ToTensorV2
 
@@ -75,6 +77,11 @@ def generate_masks():
     )
 
     # print(test_loader)
+
+    Path(my_path + "/test_model/generated_masks/").mkdir(parents=True, exist_ok=True)
+
+    for file in os.listdir(my_path + "/test_model/generated_masks/"):
+        os.remove(my_path + "/test_model/generated_masks/" + file)
 
     save_predictions_as_imgs(
         test_loader, model, image_names, "test_model/generated_masks/", device)

@@ -2,6 +2,8 @@ from PIL import Image
 import os
 from PIL import ImageFilter
 import random
+from pathlib import Path
+
 
 my_path = os.path.dirname(__file__)
 
@@ -14,6 +16,12 @@ class ProcessDataset():
         self.test_image_path = test_image_path
         self.test_mask_path = test_mask_path
         self.restricted = restricted
+
+        Path(my_path + "/data").mkdir(parents=True, exist_ok=True)
+        Path(my_path + "/data/test_images").mkdir(parents=True, exist_ok=True)
+        Path(my_path + "/data/train_images").mkdir(parents=True, exist_ok=True)
+        Path(my_path + "/data/test_masks").mkdir(parents=True, exist_ok=True)
+        Path(my_path + "/data/train_masks").mkdir(parents=True, exist_ok=True)
 
         for file in os.listdir(train_image_path):
             os.remove(train_image_path + "\\" + file)
@@ -33,7 +41,7 @@ class ProcessDataset():
 
             img = img.resize((240, 160))
 
-            if count % 5 == 0:
+            if count % 4 == 0:
                 processed_image_path = os.path.join(
                     self.test_image_path, 'processed_' + path)
                 mask_path = os.path.join(self.test_mask_path, 'mask_' + path)

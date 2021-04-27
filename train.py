@@ -112,7 +112,7 @@ def main():
         test_loading_bar.set_postfix(loss=loss.item())
 
     print(
-        f"\Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
+        f"\nTest Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
     )
 
 
