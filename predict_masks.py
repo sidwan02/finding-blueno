@@ -35,13 +35,10 @@ def generate_masks():
 
     is_cuda = torch.cuda.is_available()
 
-   # check if cuda is available
     if is_cuda:
         device = torch.device("cuda")
-        print("GPU is available")
     else:
         device = torch.device("cpu")
-        print("GPU not available, CPU used")
 
     model.to(device)
 
@@ -49,6 +46,7 @@ def generate_masks():
 
     image_names = []
 
+    # get the image names to label the prediction masks appropriately
     for path_img in os.listdir(my_path + "/test_model/test_images"):
         image_names.append(path_img)
         full_path_img = os.path.join(
@@ -62,6 +60,7 @@ def generate_masks():
 
     test_x = torch.stack(test_x)
 
+    # the second test_x is a dummy to make the tensor of appropriate dimension so that it may be passed to the model
     test_data = TensorDataset(
         test_x, test_x)
 
@@ -78,11 +77,13 @@ def generate_masks():
     for file in os.listdir(my_path + "/test_model/generated_masks/"):
         os.remove(my_path + "/test_model/generated_masks/" + file)
 
-    save_predictions_as_imgs(
+    save_prediction_masks(
         test_loader, model, image_names, "test_model/generated_masks/", device)
 
+# convert preiction tensor into grayscale images to be saved
 
-def save_predictions_as_imgs(
+
+def save_prediction_masks(
     test_loader, model, image_names, target_folder, device,
 ):
     test_loading_bar = tqdm(test_loader, position=0, leave=True)

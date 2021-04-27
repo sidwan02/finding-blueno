@@ -76,6 +76,7 @@ class UNET(nn.Module):
 
         self.bottom_conv = UnetDoubleConv(
             feature_channels[4], feature_channels[5])
+
         self.final_conv = nn.Conv2d(
             feature_channels[1], feature_channels[0], kernel_size=1)
 
@@ -106,27 +107,28 @@ class UNET(nn.Module):
 
         # up
         x = self.up_conv_1(x)
-        skip_connection = upLayerResults[0]
-        x = TF.resize(x, size=skip_connection.shape[2:])
-        concat_skip = torch.cat((skip_connection, x), dim=1)
+        # down_copy_output represents the output of the down operation which must be cropped and pasted at each up operation
+        down_copy_output = upLayerResults[0]
+        x = TF.resize(x, size=down_copy_output.shape[2:])
+        concat_skip = torch.cat((down_copy_output, x), dim=1)
         x = self.up_layer_1(concat_skip)
 
         x = self.up_conv_2(x)
-        skip_connection = upLayerResults[1]
-        x = TF.resize(x, size=skip_connection.shape[2:])
-        concat_skip = torch.cat((skip_connection, x), dim=1)
+        down_copy_output = upLayerResults[1]
+        x = TF.resize(x, size=down_copy_output.shape[2:])
+        concat_skip = torch.cat((down_copy_output, x), dim=1)
         x = self.up_layer_2(concat_skip)
 
         x = self.up_conv_3(x)
-        skip_connection = upLayerResults[2]
-        x = TF.resize(x, size=skip_connection.shape[2:])
-        concat_skip = torch.cat((skip_connection, x), dim=1)
+        down_copy_output = upLayerResults[2]
+        x = TF.resize(x, size=down_copy_output.shape[2:])
+        concat_skip = torch.cat((down_copy_output, x), dim=1)
         x = self.up_layer_3(concat_skip)
 
         x = self.up_conv_4(x)
-        skip_connection = upLayerResults[3]
-        x = TF.resize(x, size=skip_connection.shape[2:])
-        concat_skip = torch.cat((skip_connection, x), dim=1)
+        down_copy_output = upLayerResults[3]
+        x = TF.resize(x, size=down_copy_output.shape[2:])
+        concat_skip = torch.cat((down_copy_output, x), dim=1)
         x = self.up_layer_4(concat_skip)
 
         # final

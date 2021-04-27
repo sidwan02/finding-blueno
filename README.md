@@ -20,13 +20,18 @@ Next, please run the following commands in succession at the root of the blueno_
 
 ## Prediction
 
-If you wish to predict Blueno for your own images, please create the following directory at the root of the blueno_segmentation project: test_model. Within test_model, create another folder and place your test images within it: test_images
-Then, run the following command: `python .\predict_mask.py`
+If you wish to predict Blueno for your own images, please create the following directory at the root of the blueno_segmentation project: `test_model`
+
+Within test_model, create another folder and place your test images within it: `test_images`
+
+Then, run the following command: `python .\predict_masks.py`
+
 You should be able to see the predicted masks within a new folder in test_model: `generated_masks`
 
 ## Different Target Object
 
 If you wish to use your own target object other than Blueno, please delete the contents of this folder: `target_original`
+
 Make sure to paste in your own object within this folder.
 
 Then, follow the steps earlier to train the model and give your own test images.

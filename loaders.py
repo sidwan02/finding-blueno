@@ -28,10 +28,10 @@ def get_loaders(
     pin_memory=True,
 ):
 
-    # train images
     train_x = []
     train_y = []
 
+    # convert each train image and associated mask to their pixel representation; then convert the pixel arrays into tensors
     for (path_img, path_mask) in zip(os.listdir(my_path + "\\data\\train_images\\"), os.listdir(my_path + "\\data\\train_masks\\")):
         full_path_img = os.path.join(
             my_path + "\\data\\train_images\\", path_img)
@@ -63,10 +63,10 @@ def get_loaders(
         shuffle=True,
     )
 
-    # test data
     test_x = []
     test_y = []
 
+    # convert each test image and associated mask to their pixel representation; then convert the pixel arrays into tensors
     for (path_img, path_mask) in zip(os.listdir(my_path + "\\data\\test_images\\"), os.listdir(my_path + "\\data\\test_masks\\")):
         full_path_img = os.path.join(
             my_path + "\\data\\test_images\\", path_img)
@@ -99,19 +99,3 @@ def get_loaders(
     )
 
     return train_loader, test_loader
-
-
-def check_accuracy(preds, target, device):
-    num_correct = 0
-    num_pixels = 0
-
-    preds = preds.to(device)
-    target = target.to(device)
-
-    preds = torch.sigmoid(preds).squeeze(1)
-
-    preds = (preds > 0.5).float()
-    num_correct += (preds == target).sum()
-    num_pixels += torch.numel(preds)
-
-    return (num_correct, num_pixels)

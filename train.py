@@ -6,16 +6,13 @@ import torch.nn as nn
 import torch.optim as optim
 from model import UNET
 
-from loaders import (
-    get_loaders,
-    check_accuracy,
-)
+from loaders import *
 
 import os
 my_path = os.path.dirname(__file__)
 
 
-# Hyperparameters etc.
+# Hyperparameters
 lr = 1e-6
 device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 1
@@ -25,7 +22,6 @@ img_width = 240
 
 
 def main():
-
     model = UNET(in_channels=3, out_channels=1).to(device)
     loss_fun = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -40,7 +36,7 @@ def main():
     epoch_count = 1
     for epoch in range(epochs):
         print("Epoch ", epoch_count)
-        print("--------")
+        print("---------")
         train_loading_bar = tqdm(train_loader, position=0, leave=True)
         model.train()
 
@@ -48,6 +44,7 @@ def main():
         train_total_pixels = 0
 
         count = 0
+        # iterate over the train data loader
         for _, (pixel_data, target_masks) in enumerate(train_loading_bar):
             count += 1
             pixel_data = pixel_data.to(device=device)
@@ -60,7 +57,8 @@ def main():
             loss = loss_fun(predictions, target_masks_unsqueezed)
             loss.backward()
 
-            (correct_pixels, total_pixels) = check_accuracy(
+            # get and accumualate the train accuracy
+            (correct_pixels, total_pixels) = get_accuracy(
                 predictions, target_masks, device)
 
             train_correct_pixels = train_correct_pixels + correct_pixels
@@ -68,7 +66,6 @@ def main():
 
             optimizer.step()
 
-            # update tqdm train_loading_bar
             train_loading_bar.set_postfix(loss=loss.item())
 
         print(
@@ -91,6 +88,7 @@ def main():
     print("Testing Model")
     print("=============")
     count = 0
+    # iterate over the test data loader
     for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
         count += 1
         pixel_data = pixel_data.to(device=device)
@@ -98,18 +96,36 @@ def main():
 
         predictions = model(pixel_data)
 
-        (correct_pixels, total_pixels) = check_accuracy(
+        # get and accumualate the test accuracy
+        (correct_pixels, total_pixels) = get_accuracy(
             predictions, target_masks, device)
 
         test_correct_pixels = test_correct_pixels + correct_pixels
         test_total_pixels = test_total_pixels + total_pixels
 
-        # update tqdm test_loading_bar
         test_loading_bar.set_postfix(loss=loss.item())
 
     print(
         f"\nTest Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
     )
+
+# get the accuracy of the model prediction against the target mask
+
+
+def get_accuracy(preds, target, device):
+    num_correct = 0
+    num_pixels = 0
+
+    preds = preds.to(device)
+    target = target.to(device)
+
+    preds = torch.sigmoid(preds).squeeze(1)
+
+    preds = (preds > 0.5).float()
+    num_correct += (preds == target).sum()
+    num_pixels += torch.numel(preds)
+
+    return (num_correct, num_pixels)
 
 
 if __name__ == "__main__":
