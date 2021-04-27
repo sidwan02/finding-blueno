@@ -34,10 +34,13 @@ def main():
         batch_size
     )
 
+    print("Training Model")
+    print("==============")
+
     epoch_count = 1
     for epoch in range(epochs):
         print("Epoch ", epoch_count)
-        print("=========")
+        print("--------")
         train_loading_bar = tqdm(train_loader, position=0, leave=True)
         model.train()
 
@@ -68,17 +71,20 @@ def main():
             # update tqdm train_loading_bar
             train_loading_bar.set_postfix(loss=loss.item())
 
-            if (count % 50 == 0):
-                print(
-                    f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
-                )
+            # if (count % 50 == 0):
+            #     print(
+            #         f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
+            #     )
+        print(
+            f"\nTrain Accuracy: {train_correct_pixels/train_total_pixels*100:.2f}%"
+        )
 
         model.eval()
 
         epoch_count += 1
 
     # save model upon training
-    print("traning complete!")
+    print("Training Complete!")
     torch.save(model.state_dict(), r"model" + r"\blueno_detection.pth")
 
     test_loading_bar = tqdm(test_loader)
@@ -86,6 +92,8 @@ def main():
     test_correct_pixels = 0
     test_total_pixels = 0
 
+    print("Testing Model")
+    print("=============")
     count = 0
     for _, (pixel_data, target_masks) in enumerate(test_loading_bar):
         count += 1
@@ -103,10 +111,9 @@ def main():
         # update tqdm test_loading_bar
         test_loading_bar.set_postfix(loss=loss.item())
 
-        if (count % 50 == 0):
-            print(
-                f"\Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
-            )
+    print(
+        f"\Test Accuracy: {test_correct_pixels/test_total_pixels*100:.2f}%"
+    )
 
 
 if __name__ == "__main__":

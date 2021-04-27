@@ -15,6 +15,15 @@ class ProcessDataset():
         self.test_mask_path = test_mask_path
         self.restricted = restricted
 
+        for file in os.listdir(train_image_path):
+            os.remove(train_image_path + "\\" + file)
+        for file in os.listdir(train_mask_path):
+            os.remove(train_mask_path + "\\" + file)
+        for file in os.listdir(test_image_path):
+            os.remove(test_image_path + "\\" + file)
+        for file in os.listdir(test_mask_path):
+            os.remove(test_mask_path + "\\" + file)
+
         count = 1
         for path in os.listdir(self.src_path):
             inputPath = os.path.join(self.src_path, path)
@@ -24,7 +33,7 @@ class ProcessDataset():
 
             img = img.resize((240, 160))
 
-            if count % 10 == 0:
+            if count % 5 == 0:
                 processed_image_path = os.path.join(
                     self.test_image_path, 'processed_' + path)
                 mask_path = os.path.join(self.test_mask_path, 'mask_' + path)
@@ -54,7 +63,7 @@ class ProcessDataset():
         if self.restricted:  # centered
             scale_factor = 100
         else:
-            scale_factor = random.uniform(10, 160)
+            scale_factor = random.uniform(40, 160)
         # print(scale_factor)
 
         if self.restricted:  # monosize
@@ -70,7 +79,7 @@ class ProcessDataset():
 
     def superimpose_bleuno(self, background, scale_factor, horizontal_pos, vertical_pos):
         foreground = Image.open(
-            my_path + "/blueno_original/blueno_cropped.png")
+            my_path + "/target_original/blueno_cropped.png")
 
         scale_position = (scale_factor, scale_factor)
 
