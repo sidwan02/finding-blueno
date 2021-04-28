@@ -3,7 +3,7 @@
 ## Goal
 
 The goal of this project is to reliably generate target masks of Blueno from images. The model generated, which follows the
-[UNET Architecture](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/), detects Blueno poasted on random background images.
+[UNET Architecture](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/), detects Blueno pasted on random background images.
 
 The code has been made generic such that one should be able to use any choice of target object and retrain the model.
 
