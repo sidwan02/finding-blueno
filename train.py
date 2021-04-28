@@ -15,7 +15,7 @@ my_path = os.path.dirname(__file__)
 
 
 # Hyperparameters
-lr = 1e-4
+lr = 1e-5
 device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 1
 epochs = 3
