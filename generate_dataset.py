@@ -113,7 +113,7 @@ class ProcessDataset():
         return mask
 
 
-ProcessDataset(src_path=my_path + "\\background_images\\images",
+ProcessDataset(src_path=my_path + "\\archive\\images",
                train_image_path=my_path + "\\data\\train_images",
                train_mask_path=my_path + "\\data\\train_masks",
                test_image_path=my_path + "\\data\\test_images",

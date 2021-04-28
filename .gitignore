@@ -1,7 +1,7 @@
 data/
 /known_good/data/
 /known_good/saved_images/
-background_images/
+archive/
 my_checkpoint.pth.tar
 blueno_detection.pth
 test_images/

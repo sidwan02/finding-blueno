@@ -5,6 +5,8 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 from model import UNET
+from pathlib import Path
+
 
 from loaders import *
 
@@ -13,7 +15,7 @@ my_path = os.path.dirname(__file__)
 
 
 # Hyperparameters
-lr = 1e-6
+lr = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 1
 epochs = 3
@@ -78,6 +80,9 @@ def main():
 
     # save model upon training
     print("Training Complete!")
+
+    Path(my_path + "/model").mkdir(parents=True, exist_ok=True)
+
     torch.save(model.state_dict(), r"model" + r"\blueno_detection.pth")
 
     test_loading_bar = tqdm(test_loader)
